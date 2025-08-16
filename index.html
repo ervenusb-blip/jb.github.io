@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Video Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; background: #f0f0f0; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 1rem 2rem; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+        h1 { text-align: center; }
+        textarea { width: 100%; height: 100px; padding: 8px; font-size: 1rem; }
+        button { padding: 10px 20px; font-size: 1rem; margin-top: 10px; cursor: pointer; }
+        video { width: 100%; margin-top: 20px; border-radius: 8px; }
+        .loading { color: #777; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Video Generator</h1>
+        <textarea id="prompt" placeholder="Type your video prompt here..."></textarea>
+        <button id="generateBtn">Generate Video</button>
+        <div id="loading" class="loading" style="display:none;">Generating video...</div>
+        <video id="resultVideo" controls style="display:none;"></video>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const promptInput = document.getElementById('prompt');
+        const loading = document.getElementById('loading');
+        const resultVideo = document.getElementById('resultVideo');
+
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('Please enter a prompt.');
+                return;
+            }
+
+            loading.style.display = 'block';
+            resultVideo.style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:3000/generate-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await response.json();
+
+                if (data.videoUrl) {
+                    resultVideo.src = data.videoUrl;
+                    resultVideo.style.display = 'block';
+                } else {
+                    alert('No video URL returned.');
+                }
+            } catch (err) {
+                alert('Error generating video: ' + err.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
